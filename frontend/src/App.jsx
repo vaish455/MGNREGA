@@ -3,11 +3,13 @@ import DistrictSelector from './components/DistrictSelector';
 import Dashboard from './components/Dashboard';
 import Header from './components/Header';
 import LocationDetector from './components/LocationDetector';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-function App() {
+function AppContent() {
+  const { t } = useLanguage();
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showLocationDetector, setShowLocationDetector] = useState(true);
@@ -36,16 +38,10 @@ function App() {
         {!selectedDistrict && (
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-              मनरेगा योजना - जिला रिपोर्ट
+              {t('welcomeTitle')}
             </h1>
-            <h2 className="text-2xl md:text-3xl text-gray-700 mb-4">
-              MGNREGA Yojana - District Report
-            </h2>
             <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              अपने जिले में मनरेगा योजना की जानकारी देखें
-            </p>
-            <p className="text-md md:text-lg text-gray-500 max-w-3xl mx-auto">
-              View MGNREGA scheme information for your district
+              {t('welcomeDescription')}
             </p>
           </div>
         )}
@@ -75,15 +71,20 @@ function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-600 mb-2">
-            Data source: Ministry of Rural Development, Government of India
-          </p>
-          <p className="text-sm text-gray-500">
-            डेटा स्रोत: ग्रामीण विकास मंत्रालय, भारत सरकार
+          <p className="text-gray-600">
+            {t('dataSource')}
           </p>
         </div>
       </footer>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
 

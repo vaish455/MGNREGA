@@ -1,6 +1,9 @@
 import React from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translateStateName, translateDistrictName } from '../utils/stateTranslations';
 
 function ComparisonChart({ districtData, stateAverage, districtName, stateName }) {
+  const { language } = useLanguage();
   const formatNumber = (num) => {
     if (!num) return 0;
     const numValue = typeof num === 'string' ? parseFloat(num) : num;
@@ -29,7 +32,7 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
           <div>
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-semibold text-gray-700">
-                {districtName}
+                {translateDistrictName(districtName, language)}
               </span>
               <span className="text-lg font-bold text-blue-700">
                 {unit}{districtValue.toFixed(2)}
@@ -44,7 +47,7 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
               >
                 {isDistrictBetter && districtPercent > 15 && (
                   <span className="text-white text-xs font-bold px-2 leading-6">
-                    बेहतर / Better ✓
+                    {language === 'hi' ? 'बेहतर ✓' : 'Better ✓'}
                   </span>
                 )}
               </div>
@@ -55,7 +58,7 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
           <div>
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-semibold text-gray-700">
-                {stateName} (औसत / Average)
+                {translateStateName(stateName, language)} ({language === 'hi' ? 'औसत' : 'Average'})
               </span>
               <span className="text-lg font-bold text-gray-700">
                 {unit}{stateValue.toFixed(2)}
@@ -70,7 +73,7 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
               >
                 {!isDistrictBetter && statePercent > 15 && (
                   <span className="text-white text-xs font-bold px-2 leading-6">
-                    बेहतर / Better ✓
+                    {language === 'hi' ? 'बेहतर ✓' : 'Better ✓'}
                   </span>
                 )}
               </div>
@@ -82,17 +85,21 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
         <div className="mt-2 text-sm text-gray-600">
           {districtValue > stateValue ? (
             <span className="text-green-700 font-semibold">
-              ↑ राज्य औसत से {((districtValue / stateValue - 1) * 100).toFixed(1)}% अधिक / 
-              {((districtValue / stateValue - 1) * 100).toFixed(1)}% higher than state average
+              ↑ {language === 'hi' 
+                ? `राज्य औसत से ${((districtValue / stateValue - 1) * 100).toFixed(1)}% अधिक`
+                : `${((districtValue / stateValue - 1) * 100).toFixed(1)}% higher than state average`
+              }
             </span>
           ) : districtValue < stateValue ? (
             <span className="text-orange-700 font-semibold">
-              ↓ राज्य औसत से {((1 - districtValue / stateValue) * 100).toFixed(1)}% कम / 
-              {((1 - districtValue / stateValue) * 100).toFixed(1)}% lower than state average
+              ↓ {language === 'hi'
+                ? `राज्य औसत से ${((1 - districtValue / stateValue) * 100).toFixed(1)}% कम`
+                : `${((1 - districtValue / stateValue) * 100).toFixed(1)}% lower than state average`
+              }
             </span>
           ) : (
             <span className="text-gray-700 font-semibold">
-              = राज्य औसत के बराबर / Equal to state average
+              = {language === 'hi' ? 'राज्य औसत के बराबर' : 'Equal to state average'}
             </span>
           )}
         </div>
@@ -104,7 +111,7 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
     <div className="space-y-6">
       <div className="bg-white rounded-lg p-6">
         <ComparisonBar
-          label="औसत दैनिक वेतन / Average Daily Wage"
+          label={language === 'hi' ? 'औसत दैनिक वेतन' : 'Average Daily Wage'}
           districtValue={districtWage}
           stateValue={stateWage}
           unit="₹"
@@ -113,7 +120,7 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
 
       <div className="bg-white rounded-lg p-6">
         <ComparisonBar
-          label="औसत रोजगार दिवस / Average Employment Days"
+          label={language === 'hi' ? 'औसत रोजगार दिवस' : 'Average Employment Days'}
           districtValue={districtDays}
           stateValue={stateDays}
           unit=""
@@ -122,32 +129,28 @@ function ComparisonChart({ districtData, stateAverage, districtName, stateName }
 
       {/* Summary Box */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-bold text-gray-800 mb-2">📊 सारांश / Summary:</h4>
+        <h4 className="font-bold text-gray-800 mb-2">
+          📊 {language === 'hi' ? 'सारांश:' : 'Summary:'}
+        </h4>
         <p className="text-gray-700 leading-relaxed">
           {districtWage > stateWage && districtDays > stateDays ? (
-            <>
-              🎉 <strong>बधाई हो!</strong> आपका जिला राज्य के औसत से बेहतर प्रदर्शन कर रहा है!
-              <br />
-              <span className="text-sm">
-                <strong>Congratulations!</strong> Your district is performing better than the state average!
-              </span>
-            </>
+            language === 'hi' ? (
+              <>🎉 <strong>बधाई हो!</strong> आपका जिला राज्य के औसत से बेहतर प्रदर्शन कर रहा है!</>
+            ) : (
+              <>🎉 <strong>Congratulations!</strong> Your district is performing better than the state average!</>
+            )
           ) : districtWage < stateWage && districtDays < stateDays ? (
-            <>
-              ⚠️ आपका जिला राज्य के औसत से पीछे है। सुधार की गुंजाइश है।
-              <br />
-              <span className="text-sm">
-                Your district is behind the state average. There is scope for improvement.
-              </span>
-            </>
+            language === 'hi' ? (
+              <>⚠️ आपका जिला राज्य के औसत से पीछे है। सुधार की गुंजाइश है।</>
+            ) : (
+              <>⚠️ Your district is behind the state average. There is scope for improvement.</>
+            )
           ) : (
-            <>
-              आपका जिला कुछ क्षेत्रों में बेहतर है और कुछ में सुधार की जरूरत है।
-              <br />
-              <span className="text-sm">
-                Your district is better in some areas and needs improvement in others.
-              </span>
-            </>
+            language === 'hi' ? (
+              <>आपका जिला कुछ क्षेत्रों में बेहतर है और कुछ में सुधार की जरूरत है।</>
+            ) : (
+              <>Your district is better in some areas and needs improvement in others.</>
+            )
           )}
         </p>
       </div>

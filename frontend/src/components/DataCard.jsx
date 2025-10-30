@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const colorClasses = {
   blue: 'bg-blue-100 border-blue-300 text-blue-800',
@@ -13,6 +14,7 @@ const colorClasses = {
 };
 
 function DataCard({ titleHi, titleEn, value, prefix = '', suffix = '', icon, color = 'blue', explanation, highlight = false }) {
+  const { language } = useLanguage();
   const formatNumber = (num) => {
     if (!num) return 'N/A';
     
@@ -36,12 +38,9 @@ function DataCard({ titleHi, titleEn, value, prefix = '', suffix = '', icon, col
     <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${colorClasses[color]} ${highlight ? 'ring-4 ring-green-400 ring-opacity-50' : ''}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h4 className="font-bold text-lg leading-tight mb-1">
-            {titleHi}
+          <h4 className="font-bold text-lg leading-tight">
+            {language === 'hi' ? titleHi : titleEn}
           </h4>
-          <p className="text-sm opacity-80">
-            {titleEn}
-          </p>
         </div>
         {icon && (
           <span className="text-3xl ml-2">{icon}</span>
@@ -62,7 +61,7 @@ function DataCard({ titleHi, titleEn, value, prefix = '', suffix = '', icon, col
       
       {highlight && (
         <div className="mt-2 text-xs font-semibold text-green-700 bg-green-50 rounded px-2 py-1 inline-block">
-          🎉 लक्ष्य हासिल! / Target Achieved!
+          🎉 {language === 'hi' ? 'लक्ष्य हासिल!' : 'Target Achieved!'}
         </div>
       )}
     </div>

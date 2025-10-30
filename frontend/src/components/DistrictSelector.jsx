@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translateStateName, translateDistrictName } from '../utils/stateTranslations';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -9,6 +11,7 @@ function DistrictSelector({ onSelect }) {
   const [loading, setLoading] = useState(true);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
   const [error, setError] = useState(null);
+  const { t, language } = useLanguage();
 
   // Fetch states on component mount
   useEffect(() => {
@@ -35,7 +38,7 @@ function DistrictSelector({ onSelect }) {
       }
     } catch (err) {
       console.error('Error fetching states:', err);
-      setError('कृपया बाद में पुनः प्रयास करें / Please try again later');
+      setError(language === 'hi' ? 'कृपया बाद में पुनः प्रयास करें' : 'Please try again later');
     } finally {
       setLoading(false);
     }
@@ -54,7 +57,7 @@ function DistrictSelector({ onSelect }) {
       }
     } catch (err) {
       console.error('Error fetching districts:', err);
-      setError('जिले लोड करने में त्रुटि / Error loading districts');
+      setError(language === 'hi' ? 'जिले लोड करने में त्रुटि' : 'Error loading districts');
     } finally {
       setLoadingDistricts(false);
     }
@@ -68,7 +71,7 @@ function DistrictSelector({ onSelect }) {
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-        <p className="mt-4 text-gray-600">Loading states...</p>
+        <p className="mt-4 text-gray-600">{t('loadingData')}</p>
       </div>
     );
   }
@@ -82,7 +85,7 @@ function DistrictSelector({ onSelect }) {
             onClick={fetchStates}
             className="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg"
           >
-            पुनः प्रयास करें / Try Again
+            {t('tryAgain')}
           </button>
         </div>
       </div>
@@ -95,11 +98,8 @@ function DistrictSelector({ onSelect }) {
         {/* Step 1: Select State */}
         <div className="mb-8">
           <h3 className="text-2xl font-bold text-gray-800 mb-2">
-            1. अपना राज्य चुनें
+            1. {t('selectState')}
           </h3>
-          <p className="text-lg text-gray-600 mb-4">
-            Select Your State
-          </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {states.map((state) => (
@@ -113,13 +113,13 @@ function DistrictSelector({ onSelect }) {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-800">{state.stateName}</span>
+                  <span className="text-gray-800">{translateStateName(state.stateName, language)}</span>
                   {selectedState === state.stateCode && (
-                    <span className="text-orange-600">✓</span>
+                    <span className="text-orange-600 font-bold">✓</span>
                   )}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
-                  {state._count?.districts || 0} districts
+                  {state._count?.districts || 0} {language === 'hi' ? 'जिले' : 'districts'}
                 </div>
               </button>
             ))}
@@ -130,16 +130,13 @@ function DistrictSelector({ onSelect }) {
         {selectedState && (
           <div>
             <h3 className="text-2xl font-bold text-gray-800 mb-2">
-              2. अपना जिला चुनें
+              2. {t('selectDistrict')}
             </h3>
-            <p className="text-lg text-gray-600 mb-4">
-              Select Your District
-            </p>
 
             {loadingDistricts ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-                <p className="mt-2 text-gray-600">Loading districts...</p>
+                <p className="mt-2 text-gray-600">{t('loadingData')}</p>
               </div>
             ) : districts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -151,7 +148,7 @@ function DistrictSelector({ onSelect }) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-gray-800 font-medium group-hover:font-bold">
-                        {district.districtName}
+                        {translateDistrictName(district.districtName, language)}
                       </span>
                       <span className="text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
                         →
@@ -162,9 +159,7 @@ function DistrictSelector({ onSelect }) {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                इस राज्य के लिए कोई जिला नहीं मिला
-                <br />
-                No districts found for this state
+                {language === 'hi' ? 'इस राज्य के लिए कोई जिला नहीं मिला' : 'No districts found for this state'}
               </div>
             )}
           </div>

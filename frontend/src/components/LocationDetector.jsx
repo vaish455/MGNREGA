@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translateStateName, translateDistrictName } from '../utils/stateTranslations';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 function LocationDetector({ onDistrictDetected, onSkip }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { t, language } = useLanguage();
 
   const handleDetectLocation = () => {
     setLoading(true);
     setError(null);
 
     if (!navigator.geolocation) {
-      setError('आपका ब्राउज़र लोकेशन का समर्थन नहीं करता / Your browser does not support geolocation');
+      setError(language === 'hi' ? 'आपका ब्राउज़र लोकेशन का समर्थन नहीं करता' : 'Your browser does not support geolocation');
       setLoading(false);
       return;
     }
@@ -19,27 +24,56 @@ function LocationDetector({ onDistrictDetected, onSkip }) {
         try {
           const { latitude, longitude } = position.coords;
           
-          // For now, we'll skip the actual API call as it requires geocoding service
-          // In production, call your backend API to detect district from coordinates
-          setError('स्वचालित पता लगाना शीघ्र आ रहा है। कृपया मैन्युअल रूप से चुनें / Auto-detection coming soon. Please select manually');
-          setLoading(false);
+          console.log('Detected coordinates:', { latitude, longitude });
           
-          // TODO: Implement actual API call
-          // const response = await fetch(`${API_BASE_URL}/location/detect-district`, {
-          //   method: 'POST',
-          //   headers: { 'Content-Type': 'application/json' },
-          //   body: JSON.stringify({ latitude, longitude }),
-          // });
-          // const data = await response.json();
-          // onDistrictDetected(data.district);
+          // Call backend API to detect district from coordinates
+          const response = await fetch(`${API_BASE_URL}/location/detect-district`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude, longitude }),
+          });
+          
+          const data = await response.json();
+          
+          if (data.success && data.data && data.data.district) {
+            console.log('District detected:', data.data.district);
+            
+            // Show success message if fuzzy match
+            if (data.data.fuzzyMatch) {
+              const districtNameTranslated = translateDistrictName(data.data.district.districtName, language);
+              const stateNameTranslated = translateStateName(data.data.district.state.stateName, language);
+              const msg = language === 'hi' 
+                ? `✅ पता लगाया गया: ${districtNameTranslated}, ${stateNameTranslated} (अनुमानित)`
+                : `✅ Detected: ${districtNameTranslated}, ${stateNameTranslated} (approximate match)`;
+              setError(msg);
+              setTimeout(() => {
+                onDistrictDetected(data.data.district);
+              }, 2000);
+            } else {
+              onDistrictDetected(data.data.district);
+            }
+          } else {
+            // Could not detect district
+            const baseMsg = data.error || (language === 'hi' ? 'जिला नहीं मिला' : 'District not found');
+            const selectMsg = language === 'hi' ? 'कृपया मैन्युअल रूप से चुनें' : 'Please select manually';
+            setError(`${baseMsg}\n\n${selectMsg}`);
+            setLoading(false);
+          }
         } catch (err) {
-          setError('लोकेशन का पता लगाने में त्रुटि / Error detecting location');
+          console.error('Location detection error:', err);
+          setError(language === 'hi' ? 'लोकेशन का पता लगाने में त्रुटि। कृपया मैन्युअल रूप से चुनें' : 'Error detecting location. Please select manually.');
           setLoading(false);
         }
       },
       (err) => {
-        setError('लोकेशन एक्सेस अस्वीकृत। कृपया मैन्युअल रूप से चुनें / Location access denied. Please select manually');
+        console.error('Geolocation error:', err);
+        setError(language === 'hi' ? 'लोकेशन एक्सेस अस्वीकृत। कृपया मैन्युअल रूप से चुनें' : 'Location access denied. Please select manually');
         setLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
       }
     );
   };
@@ -72,18 +106,13 @@ function LocationDetector({ onDistrictDetected, onSkip }) {
           </div>
 
           <h3 className="text-2xl font-bold text-gray-800 mb-2">
-            अपना जिला खोजें
+            {language === 'hi' ? 'अपना जिला खोजें' : 'Find Your District'}
           </h3>
-          <p className="text-xl text-gray-700 mb-6">
-            Find Your District
-          </p>
           
           <p className="text-gray-600 mb-6 leading-relaxed">
-            हम आपकी लोकेशन से आपका जिला अपने आप पता लगा सकते हैं
-            <br />
-            <span className="text-sm text-gray-500">
-              We can automatically detect your district from your location
-            </span>
+            {language === 'hi' 
+              ? 'हम आपकी लोकेशन से आपका जिला अपने आप पता लगा सकते हैं'
+              : 'We can automatically detect your district from your location'}
           </p>
 
           {error && (
@@ -92,30 +121,30 @@ function LocationDetector({ onDistrictDetected, onSkip }) {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
             <button
               onClick={handleDetectLocation}
               disabled={loading}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg text-base sm:text-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
             >
               {loading ? (
                 <>
                   <span className="inline-block mr-2">⏳</span>
-                  पता लगा रहे हैं / Detecting...
+                  {t('detectingLocation')}
                 </>
               ) : (
                 <>
                   <span className="inline-block mr-2">📍</span>
-                  मेरी लोकेशन का उपयोग करें / Use My Location
+                  {t('detectLocation')}
                 </>
               )}
             </button>
             
             <button
               onClick={onSkip}
-              className="flex-1 sm:flex-none bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-8 rounded-lg text-lg transition-colors shadow-lg"
+              className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-6 rounded-lg text-base sm:text-lg transition-colors shadow-lg"
             >
-              खुद चुनें / Choose Manually
+              {t('enterManually')}
             </button>
           </div>
         </div>

@@ -493,7 +493,7 @@ app.get('/api/sync/status', async (req, res) => {
 /**
  * POST /api/location/detect-district
  * Detect district from coordinates (lat/lng)
- * Note: This is a simple implementation. In production, use a proper geocoding service
+ * Uses Nominatim (OpenStreetMap) reverse geocoding service
  */
 app.post('/api/location/detect-district', async (req, res) => {
   try {
@@ -506,18 +506,154 @@ app.post('/api/location/detect-district', async (req, res) => {
       });
     }
 
-    // TODO: Implement proper geocoding service
-    // For now, return a placeholder response
-    res.json({
-      success: true,
-      message: 'Geolocation feature requires geocoding service integration',
-      data: null,
+    // Use Nominatim (OpenStreetMap) reverse geocoding API
+    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+    
+    const geocodeResponse = await fetch(nominatimUrl, {
+      headers: {
+        'User-Agent': 'MGNREGA-Dashboard/1.0',
+      },
+    });
+
+    if (!geocodeResponse.ok) {
+      throw new Error('Failed to fetch location data');
+    }
+
+    const locationData = await geocodeResponse.json();
+    
+    // Extract district/state from response
+    const address = locationData.address || {};
+    let detectedDistrict = address.state_district || address.county || address.district;
+    let detectedState = address.state;
+
+    if (!detectedDistrict || !detectedState) {
+      return res.json({
+        success: false,
+        error: 'Could not determine district from location',
+        locationData: address,
+      });
+    }
+
+    // Clean and normalize names (remove "district" suffix, convert to uppercase)
+    detectedDistrict = detectedDistrict
+      .toUpperCase()
+      .replace(/\s+DISTRICT$/i, '')
+      .trim();
+    
+    detectedState = detectedState
+      .toUpperCase()
+      .trim();
+
+    // Helper function to normalize district names for comparison
+    const normalizeDistrictName = (name) => {
+      return name
+        .toUpperCase()
+        .replace(/\s+/g, '') // Remove all spaces
+        .replace(/[^A-Z]/g, ''); // Remove non-alphabetic characters
+    };
+
+    // Get all districts to perform comprehensive matching
+    const allDistricts = await prisma.district.findMany({
+      include: {
+        state: true,
+      },
+    });
+
+    const normalizedDetected = normalizeDistrictName(detectedDistrict);
+
+    // Try exact match first (ignoring spaces and special characters)
+    let matchedDistrict = allDistricts.find(d => {
+      const normalizedDb = normalizeDistrictName(d.districtName);
+      return normalizedDb === normalizedDetected;
+    });
+
+    // Filter by state if we have state info and exact match found
+    if (matchedDistrict && detectedState) {
+      const stateMatches = allDistricts.filter(d => {
+        const normalizedDb = normalizeDistrictName(d.districtName);
+        return normalizedDb === normalizedDetected &&
+          (d.state.stateName.toUpperCase().includes(detectedState) ||
+           detectedState.includes(d.state.stateName.toUpperCase()));
+      });
+      
+      if (stateMatches.length > 0) {
+        matchedDistrict = stateMatches[0];
+      }
+    }
+
+    // If no exact match, try partial matching
+    if (!matchedDistrict) {
+      // Try contains match in database
+      const containsMatches = allDistricts.filter(d => {
+        const normalizedDb = normalizeDistrictName(d.districtName);
+        return normalizedDb.includes(normalizedDetected) || 
+               normalizedDetected.includes(normalizedDb);
+      });
+
+      // Filter by state if we have matches
+      if (containsMatches.length > 0 && detectedState) {
+        matchedDistrict = containsMatches.find(d =>
+          d.state.stateName.toUpperCase().includes(detectedState) ||
+          detectedState.includes(d.state.stateName.toUpperCase())
+        );
+      }
+
+      if (!matchedDistrict && containsMatches.length > 0) {
+        matchedDistrict = containsMatches[0];
+      }
+    }
+
+    // If still no match, try word-based fuzzy matching
+    if (!matchedDistrict) {
+      const districtWords = detectedDistrict.split(/\s+/).filter(w => w.length > 3);
+      
+      matchedDistrict = allDistricts.find(d => {
+        const dbDistrictName = d.districtName.toUpperCase();
+        const dbWords = dbDistrictName.split(/\s+/);
+        
+        // Check if significant words match
+        return districtWords.some(word => 
+          dbWords.some(dbWord => 
+            dbWord.includes(word) || word.includes(dbWord)
+          )
+        );
+      });
+    }
+
+    if (matchedDistrict) {
+      const isFuzzyMatch = normalizeDistrictName(matchedDistrict.districtName) !== normalizedDetected;
+      
+      return res.json({
+        success: true,
+        data: {
+          district: matchedDistrict,
+          detectedLocation: {
+            district: detectedDistrict,
+            state: detectedState,
+            full: locationData.display_name,
+          },
+          fuzzyMatch: isFuzzyMatch,
+        },
+      });
+    }
+
+    // No match found at all
+    return res.json({
+      success: false,
+      error: `Could not find district "${detectedDistrict}" in database`,
+      detectedLocation: {
+        district: detectedDistrict,
+        state: detectedState,
+        full: locationData.display_name,
+      },
+      suggestion: 'Please select your district manually',
     });
   } catch (error) {
     console.error('Error detecting district:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to detect district',
+      message: error.message,
     });
   }
 });
