@@ -6,7 +6,7 @@ function Header({ onNavigateToComparison, onNavigateToAbout, onNavigateHome }) {
   const { t, language } = useLanguage();
   
   return (
-    <header className="bg-white shadow-md border-b-4 border-orange-500">
+    <header className="bg-white shadow-md border-b-4 border-orange-500 animate-slide-down">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -40,7 +40,10 @@ function Header({ onNavigateToComparison, onNavigateToAbout, onNavigateHome }) {
             <nav className="hidden md:flex items-center space-x-2">
               <button
                 onClick={onNavigateToComparison}
-                className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center"
+                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center"
+                style={{ color: '#FF6900' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFF5ED'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -62,7 +65,10 @@ function Header({ onNavigateToComparison, onNavigateToAbout, onNavigateHome }) {
             <div className="md:hidden">
               <button
                 onClick={onNavigateToComparison}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: '#FF6900' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFF5ED'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 title={language === 'hi' ? 'तुलना करें' : 'Compare'}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

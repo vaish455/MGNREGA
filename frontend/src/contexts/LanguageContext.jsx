@@ -120,6 +120,47 @@ const translations = {
     language: "Language",
     english: "English",
     hindi: "हिन्दी",
+    
+    // Welcome Page
+    heroTag: "Empowering Rural India",
+    getStarted: "Get Started",
+    
+    // Impact Statistics
+    impactTitle: "MGNREGA Impact Across India",
+    stat100Days: "100",
+    stat100DaysLabel: "Days of Guaranteed Work",
+    statCroresPaid: "₹2.7L Cr",
+    statCroresPaidLabel: "Total Budget (2024-25)",
+    statActiveJobCards: "14.2 Cr",
+    statActiveJobCardsLabel: "Active Job Cards",
+    statWomenBeneficiaries: "56%",
+    statWomenBeneficiariesLabel: "Women Beneficiaries",
+    
+    // Features
+    featuresTitle: "Why Use This Portal?",
+    featuresSubtitle: "Empowering citizens with transparent and accessible MGNREGA data",
+    featureTransparency: "Complete Transparency",
+    featureTransparencyDesc: "View real-time MGNREGA data for any district in India. Track wages, employment days, and scheme implementation.",
+    featureRealtime: "Real-Time Updates",
+    featureRealtimeDesc: "Get the latest data synced from government sources. Stay informed about scheme performance and benefits.",
+    featureCommunity: "Community Empowerment",
+    featureCommunityDesc: "Understand your rights and entitlements. Hold local authorities accountable for proper implementation.",
+    featureEducation: "Easy to Understand",
+    featureEducationDesc: "Complex data made simple with visual charts and explanations in your language. No technical knowledge required.",
+    
+    // How It Works
+    howItWorksTitle: "How It Works",
+    howItWorksSubtitle: "Access MGNREGA data in three simple steps",
+    step1Title: "Choose Your Location",
+    step1Desc: "Select your state and district or use auto-detection to find your location instantly.",
+    step2Title: "View Dashboard",
+    step2Desc: "See comprehensive data about employment, wages, workers, and ongoing works in your district.",
+    step3Title: "Compare & Analyze",
+    step3Desc: "Compare your district with others and state averages to understand performance better.",
+    
+    // Call to Action
+    ctaTitle: "Ready to Explore MGNREGA Data?",
+    ctaDescription: "Start by selecting your district to see how MGNREGA is performing in your area.",
   },
   hi: {
     // Header
@@ -230,6 +271,47 @@ const translations = {
     language: "भाषा",
     english: "English",
     hindi: "हिन्दी",
+    
+    // Welcome Page
+    heroTag: "ग्रामीण भारत को सशक्त बनाना",
+    getStarted: "शुरू करें",
+    
+    // Impact Statistics
+    impactTitle: "पूरे भारत में मनरेगा का प्रभाव",
+    stat100Days: "100",
+    stat100DaysLabel: "गारंटीशुदा काम के दिन",
+    statCroresPaid: "₹2.7 लाख करोड़",
+    statCroresPaidLabel: "कुल बजट (2024-25)",
+    statActiveJobCards: "14.2 करोड़",
+    statActiveJobCardsLabel: "सक्रिय जॉब कार्ड",
+    statWomenBeneficiaries: "56%",
+    statWomenBeneficiariesLabel: "महिला लाभार्थी",
+    
+    // Features
+    featuresTitle: "इस पोर्टल का उपयोग क्यों करें?",
+    featuresSubtitle: "पारदर्शी और सुलभ मनरेगा डेटा के साथ नागरिकों को सशक्त बनाना",
+    featureTransparency: "पूर्ण पारदर्शिता",
+    featureTransparencyDesc: "भारत के किसी भी जिले के लिए वास्तविक समय का मनरेगा डेटा देखें। मजदूरी, रोजगार के दिनों और योजना के कार्यान्वयन को ट्रैक करें।",
+    featureRealtime: "रियल-टाइम अपडेट",
+    featureRealtimeDesc: "सरकारी स्रोतों से समन्वयित नवीनतम डेटा प्राप्त करें। योजना के प्रदर्शन और लाभों के बारे में सूचित रहें।",
+    featureCommunity: "समुदाय सशक्तिकरण",
+    featureCommunityDesc: "अपने अधिकारों और हकों को समझें। उचित कार्यान्वयन के लिए स्थानीय अधिकारियों को जवाबदेह बनाएं।",
+    featureEducation: "समझने में आसान",
+    featureEducationDesc: "जटिल डेटा को आपकी भाषा में दृश्य चार्ट और स्पष्टीकरण के साथ सरल बनाया गया। किसी तकनीकी ज्ञान की आवश्यकता नहीं।",
+    
+    // How It Works
+    howItWorksTitle: "यह कैसे काम करता है",
+    howItWorksSubtitle: "तीन सरल चरणों में मनरेगा डेटा तक पहुंचें",
+    step1Title: "अपना स्थान चुनें",
+    step1Desc: "अपना राज्य और जिला चुनें या तुरंत अपना स्थान खोजने के लिए ऑटो-डिटेक्शन का उपयोग करें।",
+    step2Title: "डैशबोर्ड देखें",
+    step2Desc: "अपने जिले में रोजगार, मजदूरी, श्रमिकों और चल रहे कार्यों के बारे में व्यापक डेटा देखें।",
+    step3Title: "तुलना करें और विश्लेषण करें",
+    step3Desc: "प्रदर्शन को बेहतर ढंग से समझने के लिए अपने जिले की तुलना अन्य जिलों और राज्य औसत से करें।",
+    
+    // Call to Action
+    ctaTitle: "मनरेगा डेटा का पता लगाने के लिए तैयार हैं?",
+    ctaDescription: "यह देखने के लिए अपना जिला चुनकर शुरू करें कि आपके क्षेत्र में मनरेगा कैसा प्रदर्शन कर रहा है।",
   }
 };
 

@@ -5,12 +5,12 @@ function AboutPage({ onBack }) {
   const { t, language } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-green-50">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-green-50 animate-fade-in">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="mb-6 flex items-center bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md text-gray-700 hover:text-blue-600 transition-all border border-gray-200 hover:border-blue-300"
+          className="mb-6 flex items-center bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md text-gray-700 hover:text-blue-600 transition-all border border-gray-200 hover:border-blue-300 animate-slide-in-left"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -19,7 +19,7 @@ function AboutPage({ onBack }) {
         </button>
 
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-orange-500 to-green-600 rounded-xl shadow-lg p-8 md:p-12 text-white mb-8">
+        <div className="bg-gradient-to-r from-orange-500 to-green-600 rounded-xl shadow-lg p-8 md:p-12 text-white mb-8 animate-slide-down">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             {language === 'hi' ? 'हमारी आवाज़, हमारे अधिकार' : 'Our Voice, Our Rights'}
           </h1>
@@ -31,7 +31,7 @@ function AboutPage({ onBack }) {
         </div>
 
         {/* Mission Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-8 animate-slide-up">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 flex items-center">
             <span className="text-3xl mr-3">🎯</span>
             {language === 'hi' ? 'हमारा मिशन' : 'Our Mission'}

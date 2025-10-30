@@ -35,7 +35,7 @@ function DataCard({ titleHi, titleEn, value, prefix = '', suffix = '', icon, col
   };
 
   return (
-    <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${colorClasses[color]} ${highlight ? 'ring-4 ring-green-400 ring-opacity-50' : ''}`}>
+    <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg hover:-translate-y-1 card-entrance ${colorClasses[color]} ${highlight ? 'ring-4 ring-green-400 ring-opacity-50' : ''}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h4 className="font-bold text-lg leading-tight">

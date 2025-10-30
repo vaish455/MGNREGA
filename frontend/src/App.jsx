@@ -6,6 +6,7 @@ import AboutPage from './components/AboutPage';
 import Header from './components/Header';
 import LocationDetector from './components/LocationDetector';
 import ChatBot from './components/ChatBot';
+import WelcomePage from './components/WelcomePage';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import './App.css';
 
@@ -16,28 +17,33 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('home'); // 'home', 'dashboard', 'comparison', 'about'
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showLocationDetector, setShowLocationDetector] = useState(true);
+  const [showWelcomePage, setShowWelcomePage] = useState(true);
+  const [showLocationDetector, setShowLocationDetector] = useState(false);
 
   const handleDistrictSelect = (district) => {
     setSelectedDistrict(district);
     setShowLocationDetector(false);
+    setShowWelcomePage(false);
     setCurrentView('dashboard');
   };
 
   const handleLocationDetected = (district) => {
     setSelectedDistrict(district);
     setShowLocationDetector(false);
+    setShowWelcomePage(false);
     setCurrentView('dashboard');
   };
 
   const handleChangeDistrict = () => {
     setSelectedDistrict(null);
     setShowLocationDetector(false);
+    setShowWelcomePage(true);
     setCurrentView('home');
   };
 
   const handleBackToWelcome = () => {
-    setShowLocationDetector(true);
+    setShowLocationDetector(false);
+    setShowWelcomePage(true);
   };
 
   const handleChatbotNavigation = (district) => {
@@ -59,7 +65,8 @@ function AppContent() {
   const handleNavigateHome = () => {
     setCurrentView('home');
     setSelectedDistrict(null);
-    setShowLocationDetector(true);
+    setShowLocationDetector(false);
+    setShowWelcomePage(true);
   };
 
   const handleBackFromComparison = () => {
@@ -92,30 +99,38 @@ function AppContent() {
         {/* Home View */}
         {currentView === 'home' && (
           <>
-            {/* Welcome Section */}
-            <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                {t('welcomeTitle')}
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                {t('welcomeDescription')}
-              </p>
-            </div>
-
-            {/* Location Detector - shown first time only */}
-            {showLocationDetector && (
-              <LocationDetector 
-                onDistrictDetected={handleLocationDetected}
-                onSkip={() => setShowLocationDetector(false)}
+            {/* Welcome Page - shown by default */}
+            {showWelcomePage && (
+              <WelcomePage 
+                onShowLocationDetector={() => {
+                  setShowWelcomePage(false);
+                  setShowLocationDetector(true);
+                }}
+                onShowDistrictSelector={() => {
+                  setShowWelcomePage(false);
+                  setShowLocationDetector(false);
+                }}
               />
             )}
 
+            {/* Location Detector */}
+            {!showWelcomePage && showLocationDetector && (
+              <div className="mt-8 animate-slide-up">
+                <LocationDetector 
+                  onDistrictDetected={handleLocationDetected}
+                  onSkip={() => setShowLocationDetector(false)}
+                />
+              </div>
+            )}
+
             {/* District Selector */}
-            {!showLocationDetector && (
-              <DistrictSelector 
-                onSelect={handleDistrictSelect}
-                onBack={handleBackToWelcome}
-              />
+            {!showWelcomePage && !showLocationDetector && (
+              <div className="animate-fade-in">
+                <DistrictSelector 
+                  onSelect={handleDistrictSelect}
+                  onBack={handleBackToWelcome}
+                />
+              </div>
             )}
           </>
         )}

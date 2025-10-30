@@ -190,7 +190,7 @@ function ComparisonPage({ onBack }) {
     if (loading) {
       return (
         <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
         </div>
       );
     }
@@ -210,7 +210,7 @@ function ComparisonPage({ onBack }) {
           const maxValue = Math.max(...comparisonData.map(item => item[metricKey] || 0));
           
           return (
-            <div key={metricKey} className="bg-gray-50 rounded-lg p-6">
+            <div key={metricKey} className="bg-gradient-to-br from-orange-50 to-green-50 rounded-xl p-6 border border-orange-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
                 {metric.label}
               </h3>
@@ -264,14 +264,14 @@ function ComparisonPage({ onBack }) {
 
     return (
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-          <thead className="bg-gray-50">
+        <table className="min-w-full bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <thead className="bg-gradient-to-r from-orange-100 to-green-100">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">
+              <th className="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b border-gray-200">
                 Metric
               </th>
               {comparisonData.map((item, index) => (
-                <th key={index} className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">
+                <th key={index} className="px-4 py-3 text-left text-sm font-bold text-gray-800 border-b border-gray-200">
                   {comparisonType === 'states' 
                     ? (language === 'hi' ? translateStateName(item.name, 'hi') : item.name)
                     : (language === 'hi' ? translateDistrictName(item.name, 'hi') : item.name)}
@@ -304,36 +304,36 @@ function ComparisonPage({ onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-green-50">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-green-50 animate-fade-in">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-slide-down">
           <button
             onClick={onBack}
-            className="mb-4 flex items-center bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md text-gray-700 hover:text-blue-600 transition-all border border-gray-200 hover:border-blue-300"
+            className="mb-4 flex items-center bg-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg text-gray-700 hover:text-orange-600 transition-all duration-200 border border-gray-200 hover:border-orange-300 font-medium transform hover:scale-105"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="font-medium">Back to Dashboard</span>
+            <span className="font-semibold">Back to Dashboard</span>
           </button>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-2">
             Comparison Dashboard
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg md:text-xl text-gray-600">
             Compare MGNREGA data across multiple states or districts
           </p>
         </div>
 
         {/* Comparison Type Selector */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Select Comparison Type</h2>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300 animate-slide-down">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Select Comparison Type</h2>
           <div className="flex gap-4">
             <button
               onClick={() => handleTypeChange('states')}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
                 comparisonType === 'states'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -341,9 +341,9 @@ function ComparisonPage({ onBack }) {
             </button>
             <button
               onClick={() => handleTypeChange('districts')}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
                 comparisonType === 'districts'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -353,16 +353,16 @@ function ComparisonPage({ onBack }) {
         </div>
 
         {/* Item Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300 animate-slide-up">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-bold text-gray-800">
               Select {comparisonType === 'states' ? 'States' : 'Districts'} 
-              <span className="text-blue-600 ml-2">({selectedItems.length}/6)</span>
+              <span className="text-orange-600 ml-2 font-bold">({selectedItems.length}/6)</span>
             </h2>
             {selectedItems.length > 0 && (
               <button
                 onClick={() => setSelectedItems([])}
-                className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-semibold text-red-600 hover:text-white hover:bg-red-500 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-500"
               >
                 Clear All
               </button>
@@ -377,7 +377,7 @@ function ComparisonPage({ onBack }) {
                 placeholder={`Search ${comparisonType === 'states' ? 'states' : 'districts'}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
               />
               <svg
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
@@ -426,10 +426,10 @@ function ComparisonPage({ onBack }) {
                   <button
                     key={comparisonType === 'states' ? item.stateCode : item.districtCode}
                     onClick={() => handleItemToggle(item)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:scale-105 ${
                       isSelected
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-orange-50 hover:text-orange-700 border border-gray-200 hover:border-orange-300'
                     }`}
                   >
                     {name}
@@ -449,18 +449,19 @@ function ComparisonPage({ onBack }) {
         </div>
 
         {/* Metrics Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Select Metrics to Compare</h2>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300 animate-fade-in">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Select Metrics to Compare</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {METRICS.map((metric) => (
               <button
                 key={metric.key}
                 onClick={() => handleMetricToggle(metric.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:scale-105 ${
                   selectedMetrics.includes(metric.key)
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-400'
                 }`}
+                style={selectedMetrics.includes(metric.key) ? { backgroundColor: '#F95400' } : {}}
               >
                 {metric.label}
               </button>
@@ -469,10 +470,10 @@ function ComparisonPage({ onBack }) {
         </div>
 
         {/* Visual Comparison */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Comparison Chart</h2>
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300 animate-scale-in">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Comparison Chart</h2>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg font-medium">
               {error}
             </div>
           )}
@@ -481,8 +482,8 @@ function ComparisonPage({ onBack }) {
 
         {/* Data Table */}
         {comparisonData.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Detailed Comparison</h2>
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300 animate-fade-in">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Detailed Comparison</h2>
             {renderDataTable()}
           </div>
         )}

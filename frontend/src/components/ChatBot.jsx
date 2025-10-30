@@ -170,7 +170,10 @@ const ChatBot = ({ onNavigate }) => {
       {/* Floating Chat Button */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-50 group"
+        className="fixed bottom-6 right-6 w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 z-50 group hover:scale-110 animate-float"
+        style={{ backgroundColor: isOpen ? '#e05800' : '#FF6900' }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e05800'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isOpen ? '#e05800' : '#FF6900'}
         aria-label="Toggle chatbot"
       >
         {isOpen ? (
@@ -209,9 +212,9 @@ const ChatBot = ({ onNavigate }) => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[32rem] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200">
+        <div className="fixed bottom-24 right-6 w-96 h-[32rem] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200 animate-scale-in">
           {/* Header */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+          <div className="text-white p-4 rounded-t-lg flex items-center justify-between" style={{ backgroundColor: '#FF6900' }}>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-400 rounded-full"></div>
               <h3 className="font-semibold">MGNREGA Assistant</h3>
@@ -249,11 +252,12 @@ const ChatBot = ({ onNavigate }) => {
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white'
+                      ? 'text-white'
                       : message.isError
                       ? 'bg-red-100 text-red-800 border border-red-200'
                       : 'bg-white text-gray-800 border border-gray-200'
                   }`}
+                  style={message.role === 'user' ? { backgroundColor: '#FF6900' } : {}}
                 >
                   {message.role === 'user' ? (
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -301,7 +305,10 @@ const ChatBot = ({ onNavigate }) => {
               <button
                 type="submit"
                 disabled={isLoading || !inputMessage.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                style={{ backgroundColor: isLoading || !inputMessage.trim() ? '' : '#FF6900' }}
+                onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#e05800')}
+                onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#FF6900')}
               >
                 <svg
                   className="w-5 h-5"
