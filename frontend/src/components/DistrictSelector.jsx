@@ -4,7 +4,7 @@ import { translateStateName, translateDistrictName } from '../utils/stateTransla
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-function DistrictSelector({ onSelect }) {
+function DistrictSelector({ onSelect, onBack }) {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [selectedState, setSelectedState] = useState('');
@@ -94,7 +94,36 @@ function DistrictSelector({ onSelect }) {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Back to Welcome Button - Show at top level */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="mb-4 flex items-center bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md text-gray-700 hover:text-blue-600 transition-all border border-gray-200 hover:border-blue-300"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span className="font-medium">{language === 'hi' ? 'वापस स्वागत पृष्ठ पर जाएं' : 'Back to Welcome'}</span>
+        </button>
+      )}
+
       <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+        {/* Back Button - Show when state is selected */}
+        {selectedState && (
+          <button
+            onClick={() => {
+              setSelectedState('');
+              setDistricts([]);
+            }}
+            className="mb-4 flex items-center bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md text-gray-700 hover:text-blue-600 transition-all border border-gray-200 hover:border-blue-300"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="font-medium">{language === 'hi' ? 'वापस राज्य चयन पर जाएं' : 'Back to State Selection'}</span>
+          </button>
+        )}
+
         {/* Step 1: Select State */}
         <div className="mb-8">
           <h3 className="text-2xl font-bold text-gray-800 mb-2">

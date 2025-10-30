@@ -54,12 +54,12 @@ const formatInlineStyles = (text) => {
   return text;
 };
 
-const ChatBot = () => {
+const ChatBot = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your MGNREGA data assistant. How can I help you today?',
+      content: 'Hello! I\'m your MGNREGA data assistant. How can I help you today? You can ask me questions or say things like "Navigate to AHMADABAD district" to view specific data.',
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -124,6 +124,23 @@ const ChatBot = () => {
           timestamp: response.data.data.timestamp,
         };
         setMessages((prev) => [...prev, assistantMessage]);
+
+        // Handle navigation if present
+        if (response.data.data.navigation && onNavigate) {
+          console.log('Navigation detected:', response.data.data.navigation);
+          const { district } = response.data.data.navigation;
+          console.log('District to navigate to:', district);
+          // Wait a moment so user can see the message, then navigate
+          setTimeout(() => {
+            console.log('Calling onNavigate with:', district);
+            onNavigate(district);
+          }, 1500);
+        } else {
+          console.log('No navigation data or onNavigate callback:', {
+            hasNavigation: !!response.data.data.navigation,
+            hasCallback: !!onNavigate
+          });
+        }
       } else {
         throw new Error(response.data.error || 'Failed to get response');
       }

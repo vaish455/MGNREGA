@@ -11,7 +11,7 @@ import { translateStateName, translateDistrictName } from '../utils/stateTransla
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-function Dashboard({ district, onChangeDistrict }) {
+function Dashboard({ district, onChangeDistrict, onNavigateToComparison }) {
   const { t, language } = useLanguage();
   const [data, setData] = useState(null);
   const [comparison, setComparison] = useState(null);
@@ -127,6 +127,17 @@ function Dashboard({ district, onChangeDistrict }) {
 
   return (
     <div className="space-y-8">
+      {/* Back Button */}
+      <button
+        onClick={onChangeDistrict}
+        className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md text-gray-700 hover:text-blue-600 transition-all border border-gray-200 hover:border-blue-300"
+      >
+        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span className="font-medium">{language === 'hi' ? 'जिला बदलें' : 'Change District'}</span>
+      </button>
+
       {/* District Header */}
       <div className="bg-gradient-to-r from-orange-500 to-green-600 rounded-xl shadow-lg p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -141,12 +152,20 @@ function Dashboard({ district, onChangeDistrict }) {
               {t('financialYear')}: {data.finYear} | {t('month')}: {data.month}
             </p>
           </div>
-          <button
-            onClick={onChangeDistrict}
-            className="mt-4 md:mt-0 bg-white text-orange-600 hover:bg-orange-50 font-bold py-2 px-6 rounded-lg transition-colors"
-          >
-            {t('changeDistrict')}
-          </button>
+          <div className="flex gap-3 mt-4 md:mt-0">
+            <button
+              onClick={onNavigateToComparison}
+              className="bg-blue-600 text-white hover:bg-blue-700 font-bold py-2 px-6 rounded-lg transition-colors shadow-md"
+            >
+              🔍 Compare
+            </button>
+            <button
+              onClick={onChangeDistrict}
+              className="bg-white text-orange-600 hover:bg-orange-50 font-bold py-2 px-6 rounded-lg transition-colors"
+            >
+              {t('changeDistrict')}
+            </button>
+          </div>
         </div>
       </div>
 

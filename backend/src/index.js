@@ -692,6 +692,219 @@ app.post('/api/location/detect-district', async (req, res) => {
 // ==================== CHATBOT ====================
 
 /**
+ * GET /api/chatbot/districts
+ * Get list of all districts for chatbot navigation (debugging)
+ */
+app.get('/api/chatbot/districts', async (req, res) => {
+  try {
+    const districts = await prisma.district.findMany({
+      include: {
+        state: true,
+      },
+      orderBy: {
+        districtName: 'asc',
+      },
+      take: 50, // Limit to first 50 for quick response
+    });
+
+    res.json({
+      success: true,
+      count: districts.length,
+      data: districts.map(d => ({
+        districtName: d.districtName,
+        districtCode: d.districtCode,
+        stateName: d.state.stateName,
+        stateCode: d.stateCode,
+      })),
+    });
+  } catch (error) {
+    console.error('Error fetching districts for chatbot:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch districts',
+    });
+  }
+});
+
+/**
+ * GET /api/compare/states
+ * Compare multiple states' MGNREGA data
+ */
+app.get('/api/compare/states', async (req, res) => {
+  try {
+    const { ids } = req.query;
+    
+    if (!ids) {
+      return res.status(400).json({
+        success: false,
+        error: 'State IDs are required',
+      });
+    }
+
+    const stateCodes = ids.split(',').map(id => id.trim());
+    
+    // Get latest data for each state
+    const comparisonData = await Promise.all(
+      stateCodes.map(async (stateCode) => {
+        const state = await prisma.state.findUnique({
+          where: { stateCode },
+        });
+
+        if (!state) return null;
+
+        // Get all districts for this state
+        const districts = await prisma.district.findMany({
+          where: { stateCode },
+        });
+
+        const districtCodes = districts.map(d => d.districtCode);
+
+        // Get latest MGNREGA data for all districts in this state
+        const latestData = await prisma.mgnregaData.findMany({
+          where: {
+            districtCode: { in: districtCodes },
+          },
+          orderBy: [
+            { finYear: 'desc' },
+            { month: 'desc' },
+          ],
+          take: districtCodes.length,
+        });
+
+        // Aggregate data across districts
+        const aggregated = latestData.reduce((acc, record) => {
+          acc.totalJobCards += Number(record.totalNoOfActiveJobCards || 0);
+          acc.totalEmployment += Number(record.totalIndividualsWorked || 0);
+          acc.totalWageRate += Number(record.avgWageRatePerDay || 0);
+          acc.totalDaysWorked += Number(record.averageDaysOfEmploymentProvided || 0);
+          acc.womenCount += Number(record.totalWomenWorked || 0);
+          acc.scCount += Number(record.totalScWorked || 0);
+          acc.stCount += Number(record.totalStWorked || 0);
+          acc.completedWorks += Number(record.totalNoOfWorksCompleted || 0);
+          acc.ongoingWorks += Number(record.totalNoOfOngoingWorks || 0);
+          acc.count += 1;
+          return acc;
+        }, {
+          totalJobCards: 0,
+          totalEmployment: 0,
+          totalWageRate: 0,
+          totalDaysWorked: 0,
+          womenCount: 0,
+          scCount: 0,
+          stCount: 0,
+          completedWorks: 0,
+          ongoingWorks: 0,
+          count: 0,
+        });
+
+        return {
+          stateCode,
+          name: state.stateName,
+          totalJobCards: aggregated.totalJobCards,
+          totalEmployment: aggregated.totalEmployment,
+          avgWageRate: aggregated.count > 0 ? aggregated.totalWageRate / aggregated.count : 0,
+          avgDaysWorked: aggregated.count > 0 ? aggregated.totalDaysWorked / aggregated.count : 0,
+          womenPercentage: aggregated.totalEmployment > 0 ? (aggregated.womenCount / aggregated.totalEmployment) * 100 : 0,
+          scPercentage: aggregated.totalEmployment > 0 ? (aggregated.scCount / aggregated.totalEmployment) * 100 : 0,
+          stPercentage: aggregated.totalEmployment > 0 ? (aggregated.stCount / aggregated.totalEmployment) * 100 : 0,
+          completedWorks: aggregated.completedWorks,
+          ongoingWorks: aggregated.ongoingWorks,
+        };
+      })
+    );
+
+    // Filter out null results
+    const validData = comparisonData.filter(d => d !== null);
+
+    res.json({
+      success: true,
+      data: validData,
+    });
+  } catch (error) {
+    console.error('Error comparing states:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to compare states',
+    });
+  }
+});
+
+/**
+ * GET /api/compare/districts
+ * Compare multiple districts' MGNREGA data
+ */
+app.get('/api/compare/districts', async (req, res) => {
+  try {
+    const { ids } = req.query;
+    
+    if (!ids) {
+      return res.status(400).json({
+        success: false,
+        error: 'District IDs are required',
+      });
+    }
+
+    const districtCodes = ids.split(',').map(id => id.trim());
+    
+    // Get latest data for each district
+    const comparisonData = await Promise.all(
+      districtCodes.map(async (districtCode) => {
+        const district = await prisma.district.findUnique({
+          where: { districtCode },
+        });
+
+        if (!district) return null;
+
+        // Get latest MGNREGA data for this district
+        const latestData = await prisma.mgnregaData.findFirst({
+          where: { districtCode },
+          orderBy: [
+            { finYear: 'desc' },
+            { month: 'desc' },
+          ],
+        });
+
+        if (!latestData) return null;
+
+        return {
+          districtCode,
+          name: district.districtName,
+          totalJobCards: Number(latestData.totalNoOfActiveJobCards || 0),
+          totalEmployment: Number(latestData.totalIndividualsWorked || 0),
+          avgWageRate: Number(latestData.avgWageRatePerDay || 0),
+          avgDaysWorked: Number(latestData.averageDaysOfEmploymentProvided || 0),
+          womenPercentage: latestData.totalIndividualsWorked > 0 
+            ? (Number(latestData.totalWomenWorked || 0) / Number(latestData.totalIndividualsWorked)) * 100 
+            : 0,
+          scPercentage: latestData.totalIndividualsWorked > 0 
+            ? (Number(latestData.totalScWorked || 0) / Number(latestData.totalIndividualsWorked)) * 100 
+            : 0,
+          stPercentage: latestData.totalIndividualsWorked > 0 
+            ? (Number(latestData.totalStWorked || 0) / Number(latestData.totalIndividualsWorked)) * 100 
+            : 0,
+          completedWorks: Number(latestData.totalNoOfWorksCompleted || 0),
+          ongoingWorks: Number(latestData.totalNoOfOngoingWorks || 0),
+        };
+      })
+    );
+
+    // Filter out null results
+    const validData = comparisonData.filter(d => d !== null);
+
+    res.json({
+      success: true,
+      data: validData,
+    });
+  } catch (error) {
+    console.error('Error comparing districts:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to compare districts',
+    });
+  }
+});
+
+/**
  * POST /api/chatbot
  * Send a message to the AI chatbot
  */
@@ -709,15 +922,23 @@ app.post('/api/chatbot', async (req, res) => {
     // Generate response based on whether we have data context
     let response;
     if (dataContext && Object.keys(dataContext).length > 0) {
-      response = await chatbotService.generateResponseWithData(message, dataContext);
+      const textResponse = await chatbotService.generateResponseWithData(message, dataContext);
+      response = { text: textResponse, navigation: null };
     } else {
       response = await chatbotService.generateResponse(message, conversationHistory || []);
     }
 
+    console.log('Chatbot API response:', {
+      messageLength: (response.text || response).length,
+      hasNavigation: !!response.navigation,
+      navigation: response.navigation
+    });
+
     res.json({
       success: true,
       data: {
-        message: response,
+        message: response.text || response,
+        navigation: response.navigation || null,
         timestamp: new Date().toISOString(),
       },
     });

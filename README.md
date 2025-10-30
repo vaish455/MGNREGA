@@ -20,6 +20,7 @@ A bilingual (Hindi/English), user-friendly web application that:
 - ✅ Provides simple, visual representation of data
 - ✅ Explains what the data means in plain language
 - ✅ Compares district performance with state averages
+- ✅ **NEW: Compare multiple states and districts side-by-side**
 - ✅ Auto-detects user's district (optional)
 - ✅ Works offline with locally cached data
 - ✅ Designed for mobile-first rural users
@@ -213,6 +214,11 @@ Setup a cron job to sync daily:
 - **District Discovery**: Auto-detect or manually select district
 - **Performance Dashboard**: View key MGNREGA metrics
 - **Comparisons**: See how your district compares to state average
+- **🆕 Multi-Region Comparison**: Compare up to 6 states or districts side-by-side
+  - Visual bar charts for easy understanding
+  - 9 different metrics to compare
+  - Detailed data table view
+  - Export-ready format
 - **Historical Trends**: Track performance over time
 - **Scheme Information**: Learn about MGNREGA rights and benefits
 - **Mobile Friendly**: Access on any device
@@ -347,11 +353,46 @@ npm test
 - `GET /api/mgnrega-data/comparison/:districtCode` - Historical comparison
 - `GET /api/mgnrega-data/state-average/:stateCode` - State averages
 
+### 🆕 Comparison Endpoints
+
+- `GET /api/compare/states?ids=01,02,03` - Compare multiple states
+- `GET /api/compare/districts?ids=0101,0102` - Compare multiple districts
+
 ### Data Sync
 
 - `POST /api/sync/state` - Sync specific state
 - `POST /api/sync/latest` - Sync latest data
 - `GET /api/sync/status` - Get sync status
+
+## 🔍 Comparison Feature
+
+### Overview
+The comparison feature allows users to compare MGNREGA performance across multiple states or districts simultaneously. This powerful tool helps identify:
+- Best performing regions
+- Areas needing improvement
+- Regional patterns and trends
+- Policy impact analysis
+
+### Quick Start
+1. Click "🔍 Compare States & Districts" from homepage
+2. Select comparison type (States or Districts)
+3. Choose 2-6 items to compare
+4. Select metrics to analyze
+5. View visual charts and data tables
+
+### Documentation
+- **Complete Guide**: See [COMPARISON_FEATURE.md](./COMPARISON_FEATURE.md)
+- **Quick Start**: See [COMPARISON_QUICK_START.md](./COMPARISON_QUICK_START.md)
+- **Architecture**: See [COMPARISON_ARCHITECTURE.md](./COMPARISON_ARCHITECTURE.md)
+
+### Key Features
+- Compare up to 6 states or districts
+- 9 different metrics available
+- Visual bar charts for easy understanding
+- Detailed data table view
+- Real-time data updates
+- Multi-language support
+- Mobile responsive
 
 ## 🤝 Contributing
 
@@ -380,9 +421,13 @@ For issues or questions:
 - [ ] SMS notifications for updates
 - [ ] Offline-first PWA
 - [ ] Data export (PDF, image)
-- [ ] District-to-district comparison
+- [x] ✅ **District-to-district comparison** (Completed!)
+- [x] ✅ **State-to-state comparison** (Completed!)
 - [ ] Year-over-year trend analysis
 - [ ] Mobile app (React Native)
+- [ ] Export comparison results
+- [ ] Save favorite comparisons
+- [ ] Shareable comparison links
 
 ## 📞 Contact
 
