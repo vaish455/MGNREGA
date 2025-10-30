@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model State {
+  id          String     @id @default(uuid())
+  stateCode   String     @unique @map("state_code")
+  stateName   String     @map("state_name")
+  districts   District[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([stateName])
+  @@map("states")
+}
+
+model District {
+  id           String        @id @default(uuid())
+  districtCode String        @unique @map("district_code")
+  districtName String        @map("district_name")
+  stateCode    String        @map("state_code")
+  state        State         @relation(fields: [stateCode], references: [stateCode])
+  mgnregaData  MgnregaData[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@index([stateCode])
+  @@index([districtName])
+  @@map("districts")
+}
+
+model MgnregaData {
+  id                                                String   @id @default(uuid())
+  finYear                                           String   @map("fin_year")
+  month                                             String
+  districtCode                                      String   @map("district_code")
+  district                                          District @relation(fields: [districtCode], references: [districtCode])
+  
+  // Labor Budget and Employment
+  approvedLabourBudget                              BigInt?  @map("approved_labour_budget")
+  averageWageRatePerDayPerPerson                    Float?   @map("average_wage_rate_per_day_per_person")
+  averageDaysOfEmploymentProvidedPerHousehold       Int?     @map("average_days_of_employment_provided_per_household")
+  totalHouseholdsWorked                             BigInt?  @map("total_households_worked")
+  totalIndividualsWorked                            BigInt?  @map("total_individuals_worked")
+  totalNoOfActiveJobCards                           BigInt?  @map("total_no_of_active_job_cards")
+  totalNoOfActiveWorkers                            BigInt?  @map("total_no_of_active_workers")
+  totalNoOfHhsCompleted100DaysOfWageEmployment      BigInt?  @map("total_no_of_hhs_completed_100_days")
+  totalNoOfJobCardsIssued                           BigInt?  @map("total_no_of_job_cards_issued")
+  totalNoOfWorkers                                  BigInt?  @map("total_no_of_workers")
+  
+  // Special Categories
+  differentlyAbledPersonsWorked                     BigInt?  @map("differently_abled_persons_worked")
+  scPersondays                                      BigInt?  @map("sc_persondays")
+  scWorkersAgainstActiveWorkers                     BigInt?  @map("sc_workers_against_active_workers")
+  stPersondays                                      BigInt?  @map("st_persondays")
+  stWorkersAgainstActiveWorkers                     BigInt?  @map("st_workers_against_active_workers")
+  womenPersondays                                   BigInt?  @map("women_persondays")
+  
+  // Works
+  numberOfCompletedWorks                            BigInt?  @map("number_of_completed_works")
+  numberOfOngoingWorks                              BigInt?  @map("number_of_ongoing_works")
+  totalNoOfWorksTakenup                             BigInt?  @map("total_no_of_works_takenup")
+  numberOfGPsWithNILExp                             BigInt?  @map("number_of_gps_with_nil_exp")
+  
+  // Financial
+  totalExp                                          Float?   @map("total_exp")
+  totalAdmExpenditure                               Float?   @map("total_adm_expenditure")
+  wages                                             Float?   @map("wages")
+  materialAndSkilledWages                           Float?   @map("material_and_skilled_wages")
+  persondaysOfCentralLiabilitySoFar                 BigInt?  @map("persondays_of_central_liability_so_far")
+  
+  // Percentages
+  percentOfCategoryBWorks                           Int?     @map("percent_of_category_b_works")
+  percentOfExpenditureOnAgricultureAlliedWorks      Float?   @map("percent_of_expenditure_on_agriculture_allied_works")
+  percentOfNRMExpenditure                           Float?   @map("percent_of_nrm_expenditure")
+  percentagePaymentsGeneratedWithin15Days           Float?   @map("percentage_payments_generated_within_15_days")
+  
+  remarks                                           String?
+  
+  createdAt                                         DateTime @default(now()) @map("created_at")
+  updatedAt                                         DateTime @updatedAt @map("updated_at")
+  
+  @@unique([districtCode, finYear, month])
+  @@index([finYear])
+  @@index([month])
+  @@index([districtCode, finYear])
+  @@map("mgnrega_data")
+}
+
+model SyncLog {
+  id          String   @id @default(uuid())
+  syncType    String   @map("sync_type") // 'full', 'incremental', 'state'
+  status      String   // 'started', 'completed', 'failed'
+  recordCount Int?     @map("record_count")
+  errorMsg    String?  @map("error_msg") @db.Text
+  startedAt   DateTime @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  
+  @@index([syncType, status])
+  @@map("sync_logs")
+}
