@@ -1,3 +1,5 @@
+import { smartTranslate } from './transliterate';
+
 // State name translations from English to Hindi
 export const stateTranslations = {
   "Andhra Pradesh": "आंध्र प्रदेश",
@@ -143,52 +145,23 @@ export const districtTranslations = {
 };
 
 /**
- * Translates a state name to Hindi if available
+ * Returns the state name in English (no translation)
  * @param {string} stateName - The state name in English
- * @param {string} language - The current language ('en' or 'hi')
- * @returns {string} - Translated state name or original if translation not found
+ * @param {string} language - The current language ('en' or 'hi') - ignored, kept for compatibility
+ * @returns {string} - State name in English
  */
 export const translateStateName = (stateName, language) => {
-  if (language === 'hi' && stateTranslations[stateName]) {
-    return stateTranslations[stateName];
-  }
+  // Always return English name regardless of language
   return stateName;
 };
 
 /**
- * Translates a district name to Hindi if available
+ * Returns the district name in English (no translation)
  * @param {string} districtName - The district name in English
- * @param {string} language - The current language ('en' or 'hi')
- * @returns {string} - Translated district name or original if translation not found
+ * @param {string} language - The current language ('en' or 'hi') - ignored, kept for compatibility
+ * @returns {string} - District name in English
  */
 export const translateDistrictName = (districtName, language) => {
-  if (language === 'hi') {
-    if (!districtName) return districtName;
-    
-    // Check if exact match exists
-    if (districtTranslations[districtName]) {
-      console.log(`Exact translation found for: ${districtName} -> ${districtTranslations[districtName]}`);
-      return districtTranslations[districtName];
-    }
-    
-    // Try to translate parts of compound names
-    let translatedName = districtName;
-    
-    Object.keys(districtTranslations).forEach(key => {
-      const regex = new RegExp(`\\b${key}\\b`, 'gi');
-      if (regex.test(translatedName)) {
-        translatedName = translatedName.replace(regex, districtTranslations[key]);
-      }
-    });
-    
-    // Log if no translation was applied
-    if (translatedName === districtName) {
-      console.log(`No translation for district: ${districtName}`);
-    } else {
-      console.log(`Partial translation: ${districtName} -> ${translatedName}`);
-    }
-    
-    return translatedName;
-  }
+  // Always return English name regardless of language
   return districtName;
 };

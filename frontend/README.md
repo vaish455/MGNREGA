@@ -1,11 +1,51 @@
-# React + Vite
+# MGNREGA Dashboard Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, interactive dashboard for visualizing MGNREGA (Mahatma Gandhi National Rural Employment Guarantee Act) data with rich charts and graphs.
 
-Currently, two official plugins are available:
+## 🆕 NEW: Chart.js Integration!
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The dashboard now includes comprehensive data visualizations using Chart.js:
+
+### ✨ Features
+- 📊 **Interactive Charts**: 7 different chart types for better data analysis
+- 📈 **Historical Trends**: Track changes over time with line/area charts
+- 🥧 **Distribution Charts**: Pie and doughnut charts for categorical data
+- 📊 **Comparison Views**: Bar charts comparing district vs state averages
+- 🎨 **Beautiful Design**: Color-coded, responsive, and user-friendly
+- 🌐 **Bilingual Support**: All charts support Hindi and English
+- 📱 **Mobile Ready**: Works perfectly on all devices
+- ⚡ **Performance Optimized**: Toggle charts on/off for faster loading
+
+### 📊 Available Visualizations
+1. **Metrics Overview Chart** - All key metrics in one view
+2. **Historical Trends** - Wages, Employment Days, Households, Expenditure
+3. **Gender Distribution** - Women vs Men participation
+4. **SC/ST Worker Distribution** - Demographic breakdown
+5. **Work Status** - Completed vs Ongoing projects
+6. **District vs State Comparison** - Performance benchmarking
+7. **Job Card Status** - Active vs Inactive cards
+
+See [CHARTS_QUICKREF.md](./CHARTS_QUICKREF.md) for a quick guide on using the charts.
+See [CHARTS_GUIDE.md](./CHARTS_GUIDE.md) for detailed implementation documentation.
+
+---
+
+## Tech Stack
+
+### Core
+- **React 19** - UI Framework
+- **Vite** - Build tool with HMR and Fast Refresh
+- **Tailwind CSS 4** - Utility-first styling
+
+### Visualization
+- **Chart.js 4** - Powerful charting library
+- **react-chartjs-2** - React wrapper for Chart.js
+
+### Features
+- Bilingual support (Hindi/English)
+- Location detection
+- State and district translations
+- Responsive design
 
 ## React Compiler
 

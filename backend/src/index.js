@@ -1,11 +1,14 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import { DataSyncService } from './services/data-sync.service.js';
+import { ChatbotService } from './services/chatbot.service.js';
 
 const app = express();
 const prisma = new PrismaClient();
 const syncService = new DataSyncService();
+const chatbotService = new ChatbotService();
 
 // Middleware
 app.use(cors());
@@ -302,6 +305,8 @@ app.get('/api/mgnrega-data/comparison/:districtCode', async (req, res) => {
     const { districtCode } = req.params;
     const { finYear } = req.query;
     
+    console.log('Comparison request for:', { districtCode, finYear });
+    
     // Get data for the specified financial year
     const currentYearData = await prisma.mgnregaData.findMany({
       where: {
@@ -318,6 +323,8 @@ app.get('/api/mgnrega-data/comparison/:districtCode', async (req, res) => {
       },
     });
 
+    console.log(`Found ${currentYearData.length} records for comparison`);
+
     // Get all available years for this district
     const allYears = await prisma.mgnregaData.findMany({
       where: { districtCode },
@@ -326,14 +333,35 @@ app.get('/api/mgnrega-data/comparison/:districtCode', async (req, res) => {
       orderBy: { finYear: 'desc' },
     });
 
-    // Calculate aggregates for current year
+    // Calculate aggregates for current year with safe parsing
     const currentYearAggregates = currentYearData.length > 0 ? {
-      totalHouseholdsWorked: currentYearData.reduce((sum, d) => sum + Number(d.totalHouseholdsWorked || 0), 0),
-      totalIndividualsWorked: currentYearData.reduce((sum, d) => sum + Number(d.totalIndividualsWorked || 0), 0),
-      totalExpenditure: currentYearData.reduce((sum, d) => sum + Number(d.totalExp || 0), 0),
-      averageWageRate: currentYearData.reduce((sum, d) => sum + Number(d.averageWageRatePerDayPerPerson || 0), 0) / currentYearData.length,
-      totalWorks: currentYearData.reduce((sum, d) => sum + Number(d.totalNoOfWorksTakenup || 0), 0),
-      completedWorks: currentYearData.reduce((sum, d) => sum + Number(d.numberOfCompletedWorks || 0), 0),
+      totalHouseholdsWorked: currentYearData.reduce((sum, d) => {
+        const value = Number(d.totalHouseholdsWorked || 0);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0),
+      totalIndividualsWorked: currentYearData.reduce((sum, d) => {
+        const value = Number(d.totalIndividualsWorked || 0);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0),
+      totalExpenditure: currentYearData.reduce((sum, d) => {
+        const value = Number(d.totalExp || 0);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0),
+      averageWageRate: (() => {
+        const sum = currentYearData.reduce((sum, d) => {
+          const value = Number(d.averageWageRatePerDayPerPerson || 0);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0);
+        return currentYearData.length > 0 ? sum / currentYearData.length : 0;
+      })(),
+      totalWorks: currentYearData.reduce((sum, d) => {
+        const value = Number(d.totalNoOfWorksTakenup || 0);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0),
+      completedWorks: currentYearData.reduce((sum, d) => {
+        const value = Number(d.numberOfCompletedWorks || 0);
+        return sum + (isNaN(value) ? 0 : value);
+      }, 0),
     } : null;
 
     res.json({
@@ -346,9 +374,12 @@ app.get('/api/mgnrega-data/comparison/:districtCode', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching comparison data:', error);
+    console.error('Error details:', error.message);
+    console.error('Stack:', error.stack);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch comparison data',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -653,6 +684,48 @@ app.post('/api/location/detect-district', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to detect district',
+      message: error.message,
+    });
+  }
+});
+
+// ==================== CHATBOT ====================
+
+/**
+ * POST /api/chatbot
+ * Send a message to the AI chatbot
+ */
+app.post('/api/chatbot', async (req, res) => {
+  try {
+    const { message, conversationHistory, dataContext } = req.body;
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is required',
+      });
+    }
+
+    // Generate response based on whether we have data context
+    let response;
+    if (dataContext && Object.keys(dataContext).length > 0) {
+      response = await chatbotService.generateResponseWithData(message, dataContext);
+    } else {
+      response = await chatbotService.generateResponse(message, conversationHistory || []);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        message: response,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Error in chatbot endpoint:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process chatbot request',
       message: error.message,
     });
   }

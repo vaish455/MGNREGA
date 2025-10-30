@@ -125,7 +125,8 @@ function LocationDetector({ onDistrictDetected, onSkip }) {
             <button
               onClick={handleDetectLocation}
               disabled={loading}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg text-base sm:text-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
+              style={{ backgroundColor: '#FF6900' }}
+              className="w-full sm:w-auto hover:opacity-90 text-white font-bold py-4 px-6 rounded-lg text-base sm:text-lg transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
             >
               {loading ? (
                 <>

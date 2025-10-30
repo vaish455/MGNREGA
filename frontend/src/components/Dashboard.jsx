@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import DataCard from './DataCard';
 import ComparisonChart from './ComparisonChart';
 import ExplainerBox from './ExplainerBox';
+import TrendChart from './TrendChart';
+import CategoryDistributionChart from './CategoryDistributionChart';
+import BarComparisonChart from './BarComparisonChart';
+import MetricsOverviewChart from './MetricsOverviewChart';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translateStateName, translateDistrictName } from '../utils/stateTranslations';
 
@@ -14,6 +18,12 @@ function Dashboard({ district, onChangeDistrict }) {
   const [stateAverage, setStateAverage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Chart view toggles
+  const [selectedTrendMetric, setSelectedTrendMetric] = useState('wage');
+  const [showWomenChart, setShowWomenChart] = useState(false);
+  const [showSCSTChart, setShowSCSTChart] = useState(false);
+  const [showWorksChart, setShowWorksChart] = useState(false);
 
   useEffect(() => {
     fetchDistrictData();
@@ -204,11 +214,90 @@ function Dashboard({ district, onChangeDistrict }) {
         </div>
       </div>
 
+      {/* Metrics Overview Chart */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">
+            {language === 'hi' ? '📊 मेट्रिक्स अवलोकन' : '📊 Metrics Overview'}
+          </h3>
+        </div>
+        <div className="h-80">
+          <MetricsOverviewChart data={data} />
+        </div>
+      </div>
+
+      {/* Historical Trends */}
+      {comparison && comparison.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
+          <div className="mb-4">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              {language === 'hi' ? '📈 ऐतिहासिक रुझान' : '📈 Historical Trends'}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedTrendMetric('wage')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  selectedTrendMetric === 'wage'
+                    ? 'bg-yellow-500 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {language === 'hi' ? '💰 मजदूरी' : '💰 Wages'}
+              </button>
+              <button
+                onClick={() => setSelectedTrendMetric('days')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  selectedTrendMetric === 'days'
+                    ? 'bg-purple-500 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {language === 'hi' ? '📅 रोजगार दिवस' : '📅 Employment Days'}
+              </button>
+              <button
+                onClick={() => setSelectedTrendMetric('households')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  selectedTrendMetric === 'households'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {language === 'hi' ? '🏠 परिवार' : '🏠 Households'}
+              </button>
+              <button
+                onClick={() => setSelectedTrendMetric('expenditure')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  selectedTrendMetric === 'expenditure'
+                    ? 'bg-red-500 text-white shadow-md'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {language === 'hi' ? '💵 व्यय' : '💵 Expenditure'}
+              </button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-4 h-80">
+            <TrendChart comparisonData={comparison} metric={selectedTrendMetric} />
+          </div>
+        </div>
+      )}
+
       {/* Women Participation */}
       <div className="bg-pink-50 border-2 border-pink-200 rounded-xl p-6">
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">
-          {t('womenParticipation')}
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">
+            {t('womenParticipation')}
+          </h3>
+          <button
+            onClick={() => setShowWomenChart(!showWomenChart)}
+            className="ml-4 bg-blue-200 hover:bg-blue-300 text-blue-900 font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            {language === 'hi' 
+              ? (showWomenChart ? 'ग्राफ छुपाएं' : 'ग्राफ देखें')
+              : (showWomenChart ? 'Hide Graph' : 'View Graph')
+            }
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <DataCard
             titleHi={t('womenPersonDays')}
@@ -232,14 +321,35 @@ function Dashboard({ district, onChangeDistrict }) {
               ) : t('dataNotAvailable')}
             </p>
           </div>
+          {showWomenChart && (
+            <div className="bg-white rounded-lg p-6">
+              <h4 className="text-lg font-bold text-gray-800 mb-3 text-center">
+                {language === 'hi' ? 'लिंग वितरण' : 'Gender Distribution'}
+              </h4>
+              <div className="h-64">
+                <CategoryDistributionChart data={data} type="women" chartType="doughnut" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* SC/ST Participation */}
       <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">
-          {t('scstParticipation')}
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">
+            {t('scstParticipation')}
+          </h3>
+          <button
+            onClick={() => setShowSCSTChart(!showSCSTChart)}
+            className="ml-4 bg-blue-200 hover:bg-blue-300 text-blue-900 font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            {language === 'hi' 
+              ? (showSCSTChart ? 'ग्राफ छुपाएं' : 'ग्राफ देखें')
+              : (showSCSTChart ? 'Hide Graph' : 'View Graph')
+            }
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <DataCard
             titleHi={t('scWorkers')}
@@ -255,14 +365,35 @@ function Dashboard({ district, onChangeDistrict }) {
             color="indigo"
             explanation={t('stWorkersDesc')}
           />
+          {showSCSTChart && (
+            <div className="md:col-span-2 bg-white rounded-lg p-6">
+              <h4 className="text-lg font-bold text-gray-800 mb-3 text-center">
+                {language === 'hi' ? 'SC/ST कामगार वितरण' : 'SC/ST Worker Distribution'}
+              </h4>
+              <div className="h-64">
+                <CategoryDistributionChart data={data} type="scst" chartType="pie" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Works Progress */}
       <div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">
-          {t('worksProgress')}
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800">
+            {t('worksProgress')}
+          </h3>
+          <button
+            onClick={() => setShowWorksChart(!showWorksChart)}
+            className="ml-4 bg-blue-200 hover:bg-blue-300 text-blue-900 font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            {language === 'hi' 
+              ? (showWorksChart ? 'ग्राफ छुपाएं' : 'ग्राफ देखें')
+              : (showWorksChart ? 'Hide Graph' : 'View Graph')
+            }
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <DataCard
             titleHi={t('completedWorks')}
@@ -286,6 +417,16 @@ function Dashboard({ district, onChangeDistrict }) {
             explanation={t('totalWorksStartedDesc')}
           />
         </div>
+        {showWorksChart && (
+          <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
+            <h4 className="text-lg font-bold text-gray-800 mb-3 text-center">
+              {language === 'hi' ? 'कार्य स्थिति वितरण' : 'Work Status Distribution'}
+            </h4>
+            <div className="h-64">
+              <CategoryDistributionChart data={data} type="works" chartType="doughnut" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Comparison with State Average */}
@@ -294,12 +435,31 @@ function Dashboard({ district, onChangeDistrict }) {
           <h3 className="text-2xl font-bold text-gray-800 mb-4">
             {t('comparisonWithState')}
           </h3>
-          <ComparisonChart 
-            districtData={data}
-            stateAverage={stateAverage}
-            districtName={district.districtName}
-            stateName={district.state?.stateName}
-          />
+          
+          {/* Text-based comparison */}
+          <div className="mb-6">
+            <ComparisonChart 
+              districtData={data}
+              stateAverage={stateAverage}
+              districtName={district.districtName}
+              stateName={district.state?.stateName}
+            />
+          </div>
+          
+          {/* Chart-based comparison */}
+          <div className="bg-white rounded-lg p-6">
+            <h4 className="text-lg font-bold text-gray-800 mb-4 text-center">
+              {language === 'hi' ? '📊 राज्य औसत के साथ तुलना' : '📊 Comparison with State Average'}
+            </h4>
+            <div className="h-80">
+              <BarComparisonChart 
+                districtData={data}
+                stateAverage={stateAverage}
+                districtName={district.districtName}
+                stateName={district.state?.stateName}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -330,6 +490,14 @@ function Dashboard({ district, onChangeDistrict }) {
             color="blue"
             explanation={t('activeWorkersDesc')}
           />
+        </div>
+        <div className="mt-6 bg-gradient-to-r from-teal-50 to-green-50 rounded-lg p-6">
+          <h4 className="text-lg font-bold text-gray-800 mb-3 text-center">
+            {language === 'hi' ? 'जॉब कार्ड स्थिति' : 'Job Card Status'}
+          </h4>
+          <div className="h-64">
+            <CategoryDistributionChart data={data} type="jobcards" chartType="pie" />
+          </div>
         </div>
       </div>
 

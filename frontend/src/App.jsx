@@ -3,6 +3,7 @@ import DistrictSelector from './components/DistrictSelector';
 import Dashboard from './components/Dashboard';
 import Header from './components/Header';
 import LocationDetector from './components/LocationDetector';
+import ChatBot from './components/ChatBot';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import './App.css';
 
@@ -76,6 +77,9 @@ function AppContent() {
           </p>
         </div>
       </footer>
+
+      {/* ChatBot - visible on all pages */}
+      <ChatBot />
     </div>
   );
 }
