@@ -775,13 +775,14 @@ app.get('/api/compare/states', async (req, res) => {
         const aggregated = latestData.reduce((acc, record) => {
           acc.totalJobCards += Number(record.totalNoOfActiveJobCards || 0);
           acc.totalEmployment += Number(record.totalIndividualsWorked || 0);
-          acc.totalWageRate += Number(record.avgWageRatePerDay || 0);
-          acc.totalDaysWorked += Number(record.averageDaysOfEmploymentProvided || 0);
-          acc.womenCount += Number(record.totalWomenWorked || 0);
-          acc.scCount += Number(record.totalScWorked || 0);
-          acc.stCount += Number(record.totalStWorked || 0);
-          acc.completedWorks += Number(record.totalNoOfWorksCompleted || 0);
-          acc.ongoingWorks += Number(record.totalNoOfOngoingWorks || 0);
+          acc.totalWageRate += Number(record.averageWageRatePerDayPerPerson || 0);
+          acc.totalDaysWorked += Number(record.averageDaysOfEmploymentProvidedPerHousehold || 0);
+          acc.womenPersondays += Number(record.womenPersondays || 0);
+          acc.scWorkers += Number(record.scWorkersAgainstActiveWorkers || 0);
+          acc.stWorkers += Number(record.stWorkersAgainstActiveWorkers || 0);
+          acc.totalActiveWorkers += Number(record.totalNoOfActiveWorkers || 0);
+          acc.completedWorks += Number(record.numberOfCompletedWorks || 0);
+          acc.ongoingWorks += Number(record.numberOfOngoingWorks || 0);
           acc.count += 1;
           return acc;
         }, {
@@ -789,9 +790,10 @@ app.get('/api/compare/states', async (req, res) => {
           totalEmployment: 0,
           totalWageRate: 0,
           totalDaysWorked: 0,
-          womenCount: 0,
-          scCount: 0,
-          stCount: 0,
+          womenPersondays: 0,
+          scWorkers: 0,
+          stWorkers: 0,
+          totalActiveWorkers: 0,
           completedWorks: 0,
           ongoingWorks: 0,
           count: 0,
@@ -804,9 +806,9 @@ app.get('/api/compare/states', async (req, res) => {
           totalEmployment: aggregated.totalEmployment,
           avgWageRate: aggregated.count > 0 ? aggregated.totalWageRate / aggregated.count : 0,
           avgDaysWorked: aggregated.count > 0 ? aggregated.totalDaysWorked / aggregated.count : 0,
-          womenPercentage: aggregated.totalEmployment > 0 ? (aggregated.womenCount / aggregated.totalEmployment) * 100 : 0,
-          scPercentage: aggregated.totalEmployment > 0 ? (aggregated.scCount / aggregated.totalEmployment) * 100 : 0,
-          stPercentage: aggregated.totalEmployment > 0 ? (aggregated.stCount / aggregated.totalEmployment) * 100 : 0,
+          womenPercentage: aggregated.totalActiveWorkers > 0 ? (aggregated.womenPersondays / aggregated.totalActiveWorkers) * 100 : 0,
+          scPercentage: aggregated.totalActiveWorkers > 0 ? (aggregated.scWorkers / aggregated.totalActiveWorkers) * 100 : 0,
+          stPercentage: aggregated.totalActiveWorkers > 0 ? (aggregated.stWorkers / aggregated.totalActiveWorkers) * 100 : 0,
           completedWorks: aggregated.completedWorks,
           ongoingWorks: aggregated.ongoingWorks,
         };
@@ -866,24 +868,26 @@ app.get('/api/compare/districts', async (req, res) => {
 
         if (!latestData) return null;
 
+        const totalActiveWorkers = Number(latestData.totalNoOfActiveWorkers || 0);
+        
         return {
           districtCode,
           name: district.districtName,
           totalJobCards: Number(latestData.totalNoOfActiveJobCards || 0),
           totalEmployment: Number(latestData.totalIndividualsWorked || 0),
-          avgWageRate: Number(latestData.avgWageRatePerDay || 0),
-          avgDaysWorked: Number(latestData.averageDaysOfEmploymentProvided || 0),
-          womenPercentage: latestData.totalIndividualsWorked > 0 
-            ? (Number(latestData.totalWomenWorked || 0) / Number(latestData.totalIndividualsWorked)) * 100 
+          avgWageRate: Number(latestData.averageWageRatePerDayPerPerson || 0),
+          avgDaysWorked: Number(latestData.averageDaysOfEmploymentProvidedPerHousehold || 0),
+          womenPercentage: totalActiveWorkers > 0 
+            ? (Number(latestData.womenPersondays || 0) / totalActiveWorkers) * 100 
             : 0,
-          scPercentage: latestData.totalIndividualsWorked > 0 
-            ? (Number(latestData.totalScWorked || 0) / Number(latestData.totalIndividualsWorked)) * 100 
+          scPercentage: totalActiveWorkers > 0 
+            ? (Number(latestData.scWorkersAgainstActiveWorkers || 0) / totalActiveWorkers) * 100 
             : 0,
-          stPercentage: latestData.totalIndividualsWorked > 0 
-            ? (Number(latestData.totalStWorked || 0) / Number(latestData.totalIndividualsWorked)) * 100 
+          stPercentage: totalActiveWorkers > 0 
+            ? (Number(latestData.stWorkersAgainstActiveWorkers || 0) / totalActiveWorkers) * 100 
             : 0,
-          completedWorks: Number(latestData.totalNoOfWorksCompleted || 0),
-          ongoingWorks: Number(latestData.totalNoOfOngoingWorks || 0),
+          completedWorks: Number(latestData.numberOfCompletedWorks || 0),
+          ongoingWorks: Number(latestData.numberOfOngoingWorks || 0),
         };
       })
     );
