@@ -110,6 +110,7 @@ function AppContent() {
                   setShowWelcomePage(false);
                   setShowLocationDetector(false);
                 }}
+                onDistrictDetected={handleLocationDetected}
               />
             )}
 

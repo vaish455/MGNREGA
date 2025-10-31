@@ -1,8 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { translateStateName, translateDistrictName } from '../utils/stateTranslations';
 
-function WelcomePage({ onShowLocationDetector, onShowDistrictSelector }) {
-  const { t } = useLanguage();
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+function WelcomePage({ onShowLocationDetector, onShowDistrictSelector, onDistrictDetected }) {
+  const { t, language } = useLanguage();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleDetectLocation = () => {
+    setLoading(true);
+    setError(null);
+
+    if (!navigator.geolocation) {
+      setError(language === 'hi' ? 'आपका ब्राउज़र लोकेशन का समर्थन नहीं करता' : 'Your browser does not support geolocation');
+      setLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          console.log('Detected coordinates:', { latitude, longitude });
+          
+          // Call backend API to detect district from coordinates
+          const response = await fetch(`${API_BASE_URL}/location/detect-district`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude, longitude }),
+          });
+          
+          const data = await response.json();
+          
+          if (data.success && data.data && data.data.district) {
+            console.log('District detected:', data.data.district);
+            
+            // Navigate directly to district data
+            if (onDistrictDetected) {
+              onDistrictDetected(data.data.district);
+            }
+          } else {
+            // Could not detect district
+            const baseMsg = data.error || (language === 'hi' ? 'जिला नहीं मिला' : 'District not found');
+            const selectMsg = language === 'hi' ? 'कृपया मैन्युअल रूप से चुनें' : 'Please select manually';
+            setError(`${baseMsg}. ${selectMsg}`);
+            setLoading(false);
+          }
+        } catch (err) {
+          console.error('Location detection error:', err);
+          setError(language === 'hi' ? 'लोकेशन का पता लगाने में त्रुटि। कृपया मैन्युअल रूप से चुनें' : 'Error detecting location. Please select manually.');
+          setLoading(false);
+        }
+      },
+      (err) => {
+        console.error('Geolocation error:', err);
+        setError(language === 'hi' ? 'लोकेशन एक्सेस अस्वीकृत। कृपया मैन्युअल रूप से चुनें' : 'Location access denied. Please select manually');
+        setLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const features = [
     {
@@ -69,19 +133,38 @@ function WelcomePage({ onShowLocationDetector, onShowDistrictSelector }) {
           {t('welcomeDescription')}
         </p>
 
+        {error && (
+          <div className="max-w-md mx-auto p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">{error}</p>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
           <button
-            onClick={onShowLocationDetector}
-            className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+            onClick={handleDetectLocation}
+            disabled={loading}
+            className="group bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {t('detectLocation')}
-            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            {loading ? (
+              <>
+                <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {t('detectingLocation')}
+              </>
+            ) : (
+              <>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {t('detectLocation')}
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </>
+            )}
           </button>
           
           <button
