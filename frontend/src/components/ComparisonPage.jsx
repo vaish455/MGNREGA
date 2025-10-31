@@ -186,6 +186,101 @@ function ComparisonPage({ onBack }) {
     return value.toLocaleString('en-IN', { maximumFractionDigits: 2 });
   };
 
+  const exportToCSV = () => {
+    if (comparisonData.length === 0) {
+      alert('No data to export. Please select items to compare first.');
+      return;
+    }
+
+    // Build CSV header
+    const headers = ['Metric', ...comparisonData.map(item => 
+      comparisonType === 'states' 
+        ? item.name
+        : item.name
+    )];
+    
+    // Build CSV rows
+    const rows = METRICS.filter(m => selectedMetrics.includes(m.key)).map(metric => {
+      return [
+        metric.label,
+        ...comparisonData.map(item => {
+          const value = item[metric.key];
+          if (typeof value !== 'number') return 'N/A';
+          return value;
+        })
+      ];
+    });
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `mgnrega_comparison_${comparisonType}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToExcel = () => {
+    if (comparisonData.length === 0) {
+      alert('No data to export. Please select items to compare first.');
+      return;
+    }
+
+    // Build Excel-compatible HTML table
+    const headers = ['Metric', ...comparisonData.map(item => 
+      comparisonType === 'states' 
+        ? item.name
+        : item.name
+    )];
+    
+    const rows = METRICS.filter(m => selectedMetrics.includes(m.key)).map(metric => {
+      return [
+        metric.label,
+        ...comparisonData.map(item => {
+          const value = item[metric.key];
+          if (typeof value !== 'number') return 'N/A';
+          return value;
+        })
+      ];
+    });
+
+    // Create HTML table
+    let htmlTable = '<table border="1"><thead><tr>';
+    headers.forEach(header => {
+      htmlTable += `<th>${header}</th>`;
+    });
+    htmlTable += '</tr></thead><tbody>';
+    
+    rows.forEach(row => {
+      htmlTable += '<tr>';
+      row.forEach(cell => {
+        htmlTable += `<td>${cell}</td>`;
+      });
+      htmlTable += '</tr>';
+    });
+    htmlTable += '</tbody></table>';
+
+    // Create and download file
+    const blob = new Blob([htmlTable], { type: 'application/vnd.ms-excel' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `mgnrega_comparison_${comparisonType}_${new Date().toISOString().split('T')[0]}.xls`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const renderChart = () => {
     if (loading) {
       return (
@@ -483,7 +578,29 @@ function ComparisonPage({ onBack }) {
         {/* Data Table */}
         {comparisonData.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300 animate-fade-in">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Detailed Comparison</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Detailed Comparison</h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={exportToCSV}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export CSV
+                </button>
+                <button
+                  onClick={exportToExcel}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export Excel
+                </button>
+              </div>
+            </div>
             {renderDataTable()}
           </div>
         )}

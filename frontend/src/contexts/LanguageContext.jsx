@@ -316,14 +316,20 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en');
+  // Initialize language from localStorage or default to 'en'
+  const [language, setLanguage] = useState(() => {
+    const savedLanguage = localStorage.getItem('mgnrega-language');
+    return savedLanguage || 'en';
+  });
 
   const t = (key) => {
     return translations[language][key] || key;
   };
 
   const toggleLanguage = (lang) => {
+    console.log('Switching language to:', lang);
     setLanguage(lang);
+    localStorage.setItem('mgnrega-language', lang);
   };
 
   return (
